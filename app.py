@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # Render Backend URL
-be_url = st.secrets["be_url"]
+be_url = os.getenv("be_url")
 st.title("AI Interview Preparation Helper Bot")
 
 with st.form("Details"):
