@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import os
 
 # Render Backend URL
 be_url = os.getenv("be_url")
