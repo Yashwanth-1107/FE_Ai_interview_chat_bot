@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # Render Backend URL
-be_url = "https://be-ai-interview-chat-bot.onrender.com"
+be_url = "https://be-ai-interview-chat-bot-1.onrender.com"
 
 st.title("AI Interview Preparation Helper Bot")
 
