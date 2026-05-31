@@ -1,14 +1,15 @@
 import streamlit as st
 import requests
 
-be_url = "http://127.0.0.1:8000"
+# Render Backend URL
+be_url = "https://be-ai-interview-chat-bot.onrender.com"
 
 st.title("AI Interview Preparation Helper Bot")
 
 with st.form("Details"):
 
     topic = st.text_input("Enter Lang/Topic:")
-    
+
     level = st.selectbox(
         "Choose Level",
         ["Easy", "Medium", "Advanced"]
@@ -23,6 +24,14 @@ with st.form("Details"):
 
     if submit:
 
+        if not topic:
+            st.warning("Please enter a topic.")
+            st.stop()
+
+        if not ways:
+            st.warning("Please select at least one question type.")
+            st.stop()
+
         prompt = f"""
 Generate interview questions.
 
@@ -36,7 +45,7 @@ IMPORTANT RULES:
 3. Do NOT return answers.
 4. Do NOT return markdown.
 5. Do NOT return any text before or after the JSON.
-6. Generate 10 questions for each selected question type.
+6. Generate exactly 10 questions for each selected question type.
 
 Expected format:
 
@@ -50,41 +59,60 @@ Expected format:
 
         with st.spinner("Generating Questions..."):
 
-            response = requests.post(
-                f"{be_url}/generate",
-                json={"prompt": prompt}
-            )
+            try:
 
-            if response.status_code == 200:
+                response = requests.post(
+                    f"{be_url}/generate",
+                    json={"prompt": prompt},
+                    timeout=120
+                )
 
-                result = response.json()
+                st.write("Status Code:", response.status_code)
 
-                if "object" in result:
+                if response.status_code == 200:
 
-                    questions = result["object"]
+                    result = response.json()
 
-                    st.success(
-                        f"Generated {len(questions)} Questions"
-                    )
+                    if "object" in result:
 
-                    for i, q in enumerate(questions, start=1):
+                        questions = result["object"]
 
-                        st.write(
-                            f"**{i}. [{q['question_type']}]**"
+                        st.success(
+                            f"Generated {len(questions)} Questions"
                         )
 
-                        st.write(q["question"])
+                        for i, q in enumerate(questions, start=1):
 
-                        st.divider()
+                            st.write(
+                                f"### {i}. [{q['question_type']}]"
+                            )
+
+                            st.write(q["question"])
+
+                            st.divider()
+
+                    else:
+
+                        st.error(
+                            result.get(
+                                "error",
+                                "Unknown backend error"
+                            )
+                        )
+
+                        if "raw_output" in result:
+                            st.code(result["raw_output"])
 
                 else:
-                    st.error(result.get("error"))
 
-                    st.code(
-                        result.get("raw_output", "")
+                    st.error(
+                        f"Backend Error: {response.status_code}"
                     )
 
-            else:
+                    st.write(response.text)
+
+            except Exception as e:
+
                 st.error(
-                    f"Backend Error: {response.status_code}"
+                    f"Connection Error: {str(e)}"
                 )

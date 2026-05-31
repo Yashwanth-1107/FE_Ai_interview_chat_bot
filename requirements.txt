@@ -1,2 +1,3 @@
 streamlit
-requests
+requests  
+https://github.com/Yashwanth-1107/BE_AI_interview_chat_bot.git
